@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fortnightly Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#F7F3ED; --ink:#1C1814; --ink-light:#5C5650; --ink-faint:#A09890;
+    --terracotta:#C4623A; --terracotta-light:#E8927A;
+    --sage:#7A9E7E; --sage-light:#B5CEB8;
+    --gold:#C8A84B; --gold-light:#E8D08A;
+    --border:#E2DAD0; --card:#FFFFFF;
+    --shadow:0 2px 20px rgba(28,24,20,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6;}
+
+  /* HEADER */
+  header{background:var(--ink);padding:16px 18px 13px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;}
+  header h1{font-family:'Playfair Display',serif;font-size:21px;color:var(--cream);}
+  header h1 span{color:var(--terracotta-light);font-style:italic;}
+  .hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
+  .hdr-date{font-size:11px;color:var(--ink-faint);letter-spacing:.5px;text-transform:uppercase;}
+  .hdr-sync{font-size:10px;color:var(--sage-light);}
+
+  /* NAV */
+  .nav-tabs{display:flex;background:var(--ink);border-top:1px solid rgba(255,255,255,.08);padding:0 6px 10px;}
+  .nav-tab{flex:1;background:none;border:none;color:var(--ink-faint);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;padding:10px 2px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;transition:color .2s;}
+  .nav-tab .ti{font-size:17px;}
+  .nav-tab.active{color:var(--terracotta-light);border-bottom-color:var(--terracotta-light);}
+
+  /* VIEWS */
+  .view{display:none;padding:18px 15px 110px;max-width:600px;margin:0 auto;}
+  .view.active{display:block;}
+  .sec-title{font-family:'Playfair Display',serif;font-size:23px;color:var(--ink);margin-bottom:3px;}
+  .sec-sub{font-size:13px;color:var(--ink-faint);margin-bottom:16px;}
+
+  /* OVERVIEW STRIP */
+  .ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  .ov-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+  .ov-card.hi{background:var(--ink);border-color:var(--ink);}
+  .ov-num{font-family:'Playfair Display',serif;font-size:26px;line-height:1;color:var(--ink);}
+  .ov-card.hi .ov-num{color:var(--terracotta-light);}
+  .ov-lbl{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+  .ov-card.hi .ov-lbl{color:rgba(160,152,144,.7);}
+
+  /* BALANCE BAR */
+  .bal-bar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 15px;margin-bottom:16px;}
+  .bal-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-faint);margin-bottom:9px;}
+  .bal-tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .bal-tag{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+  .bt-veg{background:#EBF5EC;color:#2E6B33;} .bt-meat{background:#FFF0E8;color:#A04020;}
+  .bt-fish{background:#E8F0FF;color:#2040A0;} .bt-pasta{background:#FFF8E0;color:#806020;}
+  .bt-other{background:#F0F0F0;color:#505050;}
+  .bal-empty{font-size:13px;color:var(--ink-faint);font-style:italic;}
+
+  /* QUICK ACTIONS */
+  .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+  .qa-btn{background:var(--card);border:1.5px solid var(--border);border-radius:13px;padding:12px 12px;cursor:pointer;text-align:left;transition:all .2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:10px;}
+  .qa-btn:hover{border-color:var(--terracotta);background:#FFF8F6;}
+  .qa-btn:active{transform:scale(.97);}
+  .qa-icon{font-size:21px;flex-shrink:0;}
+  .qa-text{font-size:13px;color:var(--ink);font-weight:500;line-height:1.3;}
+  .qa-sub{font-size:11px;color:var(--ink-faint);margin-top:1px;}
+
+  /* CHAT */
+  .chat-box{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+  .chat-msgs{min-height:90px;max-height:240px;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:10px;}
+  .msg{display:flex;gap:10px;animation:fu .3s ease;}
+  @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .msg-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;}
+  .msg.ai .msg-av{background:var(--terracotta);}
+  .msg.user .msg-av{background:var(--sage);}
+  .msg-bub{background:var(--cream);border-radius:12px;padding:10px 13px;font-size:14px;line-height:1.5;max-width:calc(100% - 42px);}
+  .msg.user .msg-bub{background:var(--ink);color:var(--cream);margin-left:auto;}
+  .msg.user{flex-direction:row-reverse;}
+  .tdots{display:flex;gap:4px;align-items:center;height:18px;}
+  .tdots span{width:6px;height:6px;background:var(--ink-faint);border-radius:50%;animation:bn 1.2s infinite;}
+  .tdots span:nth-child(2){animation-delay:.2s}.tdots span:nth-child(3){animation-delay:.4s}
+  @keyframes bn{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+  .chat-inp-area{border-top:1px solid var(--border);padding:11px;display:flex;gap:9px;align-items:flex-end;}
+  .chat-inp{flex:1;border:1px solid var(--border);border-radius:12px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:14px;resize:none;outline:none;min-height:44px;max-height:120px;background:var(--cream);color:var(--ink);transition:border-color .2s;}
+  .chat-inp:focus{border-color:var(--terracotta-light);}
+  .send-btn{width:44px;height:44px;background:var(--terracotta);border:none;border-radius:12px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+  .send-btn:active{transform:scale(.95);}
+  .send-btn:disabled{opacity:.5;}
+
+  /* RECIPE CARDS */
+  .rlist{display:flex;flex-direction:column;gap:13px;}
+  .rcard{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
+  .rcard-hdr{padding:14px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;}
+  .rcard-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);}
+  .rcard-meta{display:flex;gap:7px;align-items:center;margin-top:4px;flex-wrap:wrap;}
+  .tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+  .tag-s{background:var(--sage-light);color:#2E5A32;}
+  .tag-src{background:var(--gold-light);color:#6B5200;}
+  .rtoggle{background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-faint);padding:4px;transition:transform .3s;flex-shrink:0;}
+  .rtoggle.open{transform:rotate(180deg);}
+  .rcard-body{display:none;border-top:1px solid var(--border);}
+  .rcard-body.open{display:block;}
+  .rsec{padding:12px 14px;border-bottom:1px solid var(--border);}
+  .rsec:last-child{border-bottom:none;}
+  .rsec-lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--terracotta);margin-bottom:8px;}
+  .rsec ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+  .rsec ul li{font-size:14px;color:var(--ink-light);padding-left:14px;position:relative;}
+  .rsec ul li::before{content:'·';position:absolute;left:0;color:var(--terracotta-light);}
+
+  /* Inline edit */
+  .ing-row{display:flex;align-items:center;gap:6px;}
+  .ing-span{font-size:14px;color:var(--ink-light);flex:1;padding:2px 0;border-bottom:1px solid transparent;cursor:text;outline:none;}
+  .ing-span:focus{border-bottom-color:var(--terracotta-light);}
+  .ing-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px;padding:2px 5px;opacity:0;transition:opacity .15s;}
+  .rsec ul li:hover .ing-del{opacity:1;}
+  .add-ing-row{display:flex;gap:8px;margin-top:10px;}
+  .add-ing-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--cream);outline:none;color:var(--ink);}
+  .add-ing-input:focus{border-color:var(--terracotta-light);}
+  .add-ing-btn{padding:7px 13px;background:var(--terracotta);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+
+  .rsteps ol{padding-left:0;list-style:none;counter-reset:steps;display:flex;flex-direction:column;gap:9px;}
+  .rsteps ol li{counter-increment:steps;font-size:14px;color:var(--ink-light);padding-left:30px;position:relative;line-height:1.5;}
+  .rsteps ol li::before{content:counter(steps);position:absolute;left:0;top:0;width:22px;height:22px;background:var(--terracotta);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+
+  .rcard-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);}
+  .ract-btn{flex:1;padding:9px;background:none;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+  .ract-btn.danger{color:var(--terracotta);border-color:#F0D0C8;}
+  .ract-btn.danger:hover{background:#FFF0EB;}
+  .ract-btn:not(.danger):hover{background:var(--cream);}
+
+  .empty-st{text-align:center;padding:34px 20px;color:var(--ink-faint);}
+  .empty-st .ei{font-size:36px;margin-bottom:10px;}
+  .empty-st p{font-size:14px;}
+
+  /* SHOP */
+  .shop-sum{background:var(--ink);border-radius:16px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+  .shop-sum-txt{color:var(--cream);}
+  .shop-sum-big{font-size:28px;font-family:'Playfair Display',serif;}
+  .shop-sum-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;}
+  .regen-btn{background:var(--terracotta);color:white;border:none;border-radius:11px;padding:10px 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+  .regen-btn:hover{background:var(--terracotta-light);}
+  .regen-btn:disabled{opacity:.5;}
+  .auto-b{font-size:10px;background:rgba(255,255,255,.15);border-radius:6px;padding:2px 6px;}
+  .shop-cat{margin-bottom:21px;}
+  .shop-cat-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+  .shop-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid rgba(226,218,208,.5);}
+  .shop-item:last-child{border-bottom:none;}
+  .shop-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+  .shop-chk.chk{background:var(--sage);border-color:var(--sage);color:white;font-size:13px;}
+  .shop-iname{flex:1;font-size:14px;color:var(--ink);transition:all .2s;}
+  .shop-iname.chk{color:var(--ink-faint);text-decoration:line-through;}
+  .shop-amt{font-size:12px;color:var(--ink-faint);background:var(--cream);padding:2px 8px;border-radius:10px;}
+
+  /* PANTRY */
+  .sync-banner{background:linear-gradient(135deg,#1C1814,#3A2E28);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px;}
+  .sync-ico{font-size:21px;flex-shrink:0;margin-top:2px;}
+  .sync-txt{color:var(--cream);flex:1;}
+  .sync-hd{font-size:14px;font-weight:500;margin-bottom:2px;}
+  .sync-desc{font-size:12px;color:rgba(160,152,144,.8);line-height:1.5;}
+  .sync-code-row{margin-top:8px;display:flex;gap:8px;align-items:center;}
+  .sync-code{font-family:monospace;font-size:13px;background:rgba(255,255,255,.1);color:var(--gold-light);padding:5px 10px;border-radius:8px;letter-spacing:1px;flex:1;word-break:break-all;}
+  .sync-copy-btn{background:var(--terracotta);color:white;border:none;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+  .sync-join-row{margin-top:9px;display:flex;gap:8px;}
+  .sync-join-inp{flex:1;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 11px;font-family:'DM Sans',sans-serif;font-size:13px;background:rgba(255,255,255,.08);color:white;outline:none;}
+  .sync-join-inp::placeholder{color:rgba(255,255,255,.3);}
+  .sync-join-btn{background:var(--sage);color:white;border:none;border-radius:8px;padding:6px 13px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+
+  .pantry-intro{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--ink-light);line-height:1.6;}
+  .pcat{margin-bottom:21px;}
+  .pcat-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .pcat-ico{font-size:18px;}
+  .pcat-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);}
+  .pitem{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid rgba(226,218,208,.5);}
+  .pitem-name{flex:1;font-size:14px;color:var(--ink);}
+  .pbtn-grp{display:flex;gap:6px;}
+  .pbtn{font-size:11px;padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--cream);color:var(--ink-light);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+  .pbtn.ph{background:var(--sage-light);border-color:var(--sage);color:#2E5A32;}
+  .pbtn.pn{background:#FFE8E0;border-color:var(--terracotta);color:var(--terracotta);}
+
+  /* TESCO */
+  .exp-box{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+  .exp-hdr{background:#00539F;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+  .tesco-logo{width:38px;height:38px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#00539F;flex-shrink:0;}
+  .exp-hdr-txt{color:white;}
+  .exp-hdr-txt .etitle{font-family:'Playfair Display',serif;font-size:16px;}
+  .exp-hdr-txt .esub{font-size:11px;opacity:.8;}
+  .exp-body{padding:14px 16px;}
+  .exp-inst{font-size:13px;color:var(--ink-light);line-height:1.7;margin-bottom:13px;}
+  .exp-inst strong{color:var(--ink);}
+  .exp-list{background:var(--cream);border-radius:11px;padding:12px 14px;font-size:13px;color:var(--ink-light);line-height:1.8;font-family:monospace;white-space:pre-wrap;margin-bottom:13px;max-height:200px;overflow-y:auto;border:1px solid var(--border);}
+  .copy-btn{width:100%;padding:12px;background:var(--ink);color:var(--cream);border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .copy-btn:hover{background:var(--terracotta);}
+  .cprompt-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;}
+  .cprompt-lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--terracotta);margin-bottom:8px;}
+  .cprompt-txt{font-size:13px;color:var(--ink-light);line-height:1.6;background:var(--cream);border-radius:10px;padding:12px 13px;border-left:3px solid var(--terracotta);margin-bottom:12px;white-space:pre-wrap;}
+  .cprompt-btn{width:100%;padding:11px;background:none;border:1.5px solid var(--terracotta);border-radius:11px;color:var(--terracotta);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;}
+  .cprompt-btn:hover{background:var(--terracotta);color:white;}
+
+  /* MODAL */
+  .modal-ov{position:fixed;inset:0;background:rgba(28,24,20,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+  .modal-ov.open{display:flex;}
+  .modal{background:var(--card);border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:600px;}
+  .modal-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:16px;}
+  .mfield{margin-bottom:13px;}
+  .mlbl{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-faint);margin-bottom:5px;}
+  .minput{width:100%;border:1px solid var(--border);border-radius:11px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);outline:none;color:var(--ink);}
+  .minput:focus{border-color:var(--terracotta-light);}
+  .mactions{display:flex;gap:10px;margin-top:16px;}
+  .mbtn{flex:1;padding:12px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none;}
+  .mbtn.cancel{background:var(--cream);color:var(--ink-light);border:1px solid var(--border);}
+  .mbtn.save{background:var(--terracotta);color:white;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:white;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Fortnightly <span>Shop</span></h1>
+  <div class="hdr-right">
+    <div class="hdr-date" id="hdrDate"></div>
+    <div class="hdr-sync" id="hdrSync">⬤ local</div>
+  </div>
+</header>
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showView('add')" data-view="add"><span class="ti">✦</span>Recipes</button>
+  <button class="nav-tab" onclick="showView('shop')" data-view="shop"><span class="ti">🛒</span>Shop</button>
+  <button class="nav-tab" onclick="showView('pantry')" data-view="pantry"><span class="ti">🫙</span>Pantry</button>
+  <button class="nav-tab" onclick="showView('tesco')" data-view="tesco"><span class="ti">🚚</span>Order</button>
+</div>
+
+<!-- ══ RECIPES ══ -->
+<div class="view active" id="view-add">
+  <p class="sec-title">Your Recipes</p>
+  <p class="sec-sub" id="recSub">Add recipes for your fortnight below.</p>
+
+  <div class="ov-grid">
+    <div class="ov-card hi"><div class="ov-num" id="ovR">0</div><div class="ov-lbl">Recipes</div></div>
+    <div class="ov-card"><div class="ov-num" id="ovS">0</div><div class="ov-lbl">Servings</div></div>
+    <div class="ov-card"><div class="ov-num" id="ovI">0</div><div class="ov-lbl">Ingredients</div></div>
+    <div class="ov-card"><div class="ov-num" id="ovD">0</div><div class="ov-lbl">Days fed</div></div>
+  </div>
+
+  <div class="bal-bar">
+    <div class="bal-title">Variety check</div>
+    <div class="bal-tags" id="balTags"><span class="bal-empty">Add recipes to see your variety breakdown</span></div>
+  </div>
+
+  <div class="qa-grid">
+    <button class="qa-btn" onclick="qp('I need to use up these ingredients, please suggest a recipe: ')">
+      <span class="qa-icon">🥦</span><div><div class="qa-text">Use up ingredients</div><div class="qa-sub">Tell me what's in your fridge</div></div>
+    </button>
+    <button class="qa-btn" onclick="qp('Suggest 5 balanced recipe ideas for the next two weeks. Mix of cuisines and proteins.')">
+      <span class="qa-icon">💡</span><div><div class="qa-text">Inspire me</div><div class="qa-sub">Balanced two-week ideas</div></div>
+    </button>
+    <button class="qa-btn" onclick="qp('Here is an Instagram recipe caption, please extract it as a structured recipe:\n\n')">
+      <span class="qa-icon">📱</span><div><div class="qa-text">Add from Instagram</div><div class="qa-sub">Paste caption or text below</div></div>
+    </button>
+    <button class="qa-btn" onclick="qp('Suggest a quick weeknight recipe (under 30 mins) for ')">
+      <span class="qa-icon">⚡</span><div><div class="qa-text">Quick weeknight</div><div class="qa-sub">Under 30 minutes</div></div>
+    </button>
+  </div>
+
+  <div class="chat-box">
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg ai"><div class="msg-av">🍴</div><div class="msg-bub">Hi! Paste a recipe, an Instagram caption, or tell me what you need to use up — I'll structure everything and add it to your plan. 🌿</div></div>
+    </div>
+    <div class="chat-inp-area">
+      <textarea class="chat-inp" id="chatInp" placeholder="Paste recipe, caption, or chat..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendMsg()" id="sendBtn">↑</button>
+    </div>
+  </div>
+
+  <div id="rlist" class="rlist">
+    <div class="empty-st"><div class="ei">🍽️</div><p>No recipes yet — use the quick actions or chat above!</p></div>
+  </div>
+</div>
+
+<!-- ══ SHOP ══ -->
+<div class="view" id="view-shop">
+  <p class="sec-title">Shopping List</p>
+  <p class="sec-sub">Auto-updates when you add recipes. Tap to check items off.</p>
+  <div class="shop-sum">
+    <div class="shop-sum-txt"><div class="shop-sum-big" id="shopCnt">0</div><div class="shop-sum-lbl">items to buy</div></div>
+    <button class="regen-btn" onclick="genShopList(true)" id="regenBtn">⟳ Refresh <span class="auto-b">auto</span></button>
+  </div>
+  <div id="shopContainer"><div class="empty-st"><div class="ei">📋</div><p>Add recipes and your list will appear here automatically.</p></div></div>
+</div>
+
+<!-- ══ PANTRY ══ -->
+<div class="view" id="view-pantry">
+  <p class="sec-title">Pantry Check</p>
+  <p class="sec-sub">Mark what you have. "Need" items go straight into your order.</p>
+
+  <div class="sync-banner">
+    <div class="sync-ico">🔄</div>
+    <div class="sync-txt">
+      <div class="sync-hd">Cross-device sync</div>
+      <div class="sync-desc">Share your code to keep your pantry in sync across phone, laptop, tablet — no account needed.</div>
+      <div class="sync-code-row">
+        <div class="sync-code" id="syncCode">—</div>
+        <button class="sync-copy-btn" onclick="copySyncCode()">Copy code</button>
+      </div>
+      <div class="sync-join-row">
+        <input class="sync-join-inp" id="syncJoinInp" placeholder="Enter a code to sync from another device…"/>
+        <button class="sync-join-btn" onclick="joinSync()">Join</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pantry-intro">Run through this before each shop. Tap <strong>Have ✓</strong> if you're stocked, or <strong>Need</strong> if you're running low. Needed items are added to your Tesco order automatically.</div>
+  <div id="pantryContainer"></div>
+</div>
+
+<!-- ══ ORDER ══ -->
+<div class="view" id="view-tesco">
+  <p class="sec-title">Tesco Order</p>
+  <p class="sec-sub">Your complete list, ready for Claude for Chrome.</p>
+  <div class="exp-box">
+    <div class="exp-hdr">
+      <div class="tesco-logo">T</div>
+      <div class="exp-hdr-txt"><div class="etitle">Ready to Order</div><div class="esub">Copy list → Claude for Chrome on tesco.com</div></div>
+    </div>
+    <div class="exp-body">
+      <div class="exp-inst"><strong>Step 1:</strong> Copy your shopping list below.<br><strong>Step 2:</strong> Open Claude for Chrome on tesco.com.<br><strong>Step 3:</strong> Paste the ready-made prompt into Claude for Chrome.</div>
+      <div class="exp-list" id="expList">Add recipes and check your pantry to generate your order.</div>
+      <button class="copy-btn" onclick="copyList()">📋 Copy Shopping List</button>
+    </div>
+  </div>
+  <div class="cprompt-box">
+    <div class="cprompt-lbl">Claude for Chrome Prompt</div>
+    <div class="cprompt-txt" id="cprompt">Your prompt will appear here once you have items ready.</div>
+    <button class="cprompt-btn" onclick="copyPrompt()">Copy Prompt for Claude for Chrome</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-ov" id="editModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">Edit Recipe</div>
+    <div class="mfield"><div class="mlbl">Recipe name</div><input class="minput" id="editName" type="text"/></div>
+    <div class="mfield"><div class="mlbl">Serves</div><input class="minput" id="editServes" type="text" placeholder="e.g. 2–3"/></div>
+    <div class="mfield"><div class="mlbl">Source</div><input class="minput" id="editSource" type="text" placeholder="e.g. Instagram, Suggested"/></div>
+    <div class="mactions">
+      <button class="mbtn cancel" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn save" onclick="saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ SYNC ID ══
+function getSyncId(){let id=localStorage.getItem('shopSyncId');if(!id){id=Math.random().toString(36).substr(2,4).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();localStorage.setItem('shopSyncId',id);}return id;}
+let syncId=getSyncId();
+
+async function savePantryCloud(p){
+  try{await window.storage.set('pantry:'+syncId,JSON.stringify(p),false);document.getElementById('hdrSync').textContent='⬤ synced';document.getElementById('hdrSync').style.color='var(--sage-light)';}
+  catch(e){document.getElementById('hdrSync').textContent='⬤ local';}
+}
+async function loadPantryCloud(id){
+  try{const r=await window.storage.get('pantry:'+id);if(r&&r.value)return JSON.parse(r.value);}catch(e){}return null;
+}
+function copySyncCode(){navigator.clipboard.writeText(syncId).then(()=>toast('📋 Sync code copied! Use it on your other device.'));}
+async function joinSync(){
+  const v=document.getElementById('syncJoinInp').value.trim().toUpperCase();
+  if(!v){toast('Please enter a sync code');return;}
+  const data=await loadPantryCloud(v);
+  if(data){
+    syncId=v;localStorage.setItem('shopSyncId',syncId);
+    mergePantry(data);saveState();renderPantry();
+    document.getElementById('syncCode').textContent=syncId;
+    document.getElementById('syncJoinInp').value='';
+    toast('✅ Joined! Pantry synced from your other device.');
+  }else{toast('Code not found — double-check and try again');}
+}
+function mergePantry(data){
+  Object.keys(data).forEach(cat=>{
+    if(state.pantry[cat])data[cat].forEach(si=>{const it=state.pantry[cat].find(i=>i.name===si.name);if(it)it.status=si.status;});
+  });
+}
+
+// ══ STATE ══
+let state={
+  recipes:[],shoppingItems:{},shoppingDirty:false,
+  pantry:{
+    oils:[
+      {name:'Olive oil',status:'unknown'},{name:'Vegetable / sunflower oil',status:'unknown'},
+      {name:'Sesame oil',status:'unknown'},{name:'Coconut oil',status:'unknown'},
+      {name:'Balsamic vinegar',status:'unknown'},{name:'Red wine vinegar',status:'unknown'},
+      {name:'White wine vinegar',status:'unknown'},{name:'Apple cider vinegar',status:'unknown'},
+    ],
+    herbs:[
+      {name:'Smoked paprika',status:'unknown'},{name:'Cumin (ground)',status:'unknown'},
+      {name:'Coriander (ground)',status:'unknown'},{name:'Turmeric',status:'unknown'},
+      {name:'Chilli flakes',status:'unknown'},{name:'Oregano',status:'unknown'},
+      {name:'Thyme',status:'unknown'},{name:'Mixed herbs',status:'unknown'},
+      {name:'Bay leaves',status:'unknown'},{name:'Cinnamon (ground)',status:'unknown'},
+      {name:'Black pepper',status:'unknown'},{name:'Sea salt / flaky salt',status:'unknown'},
+    ],
+    sauces:[
+      {name:'Soy sauce',status:'unknown'},{name:'Fish sauce',status:'unknown'},
+      {name:'Worcestershire sauce',status:'unknown'},{name:'Hot sauce / Sriracha',status:'unknown'},
+      {name:'Tomato purée / paste',status:'unknown'},{name:'Tinned chopped tomatoes',status:'unknown'},
+      {name:'Coconut milk (tinned)',status:'unknown'},{name:'Honey',status:'unknown'},
+      {name:'Dijon mustard',status:'unknown'},{name:'Tahini',status:'unknown'},
+      {name:'Stock cubes (chicken/veg)',status:'unknown'},
+    ]
+  }
+};
+let editIdx=null;
+
+function loadState(){
+  try{
+    const s=localStorage.getItem('fshop_v3');
+    if(s){const p=JSON.parse(s);state.recipes=p.recipes||[];state.shoppingItems=p.shoppingItems||{};state.shoppingDirty=p.shoppingDirty||false;
+      if(p.pantry)mergePantry(p.pantry);}
+  }catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem('fshop_v3',JSON.stringify({recipes:state.recipes,shoppingItems:state.shoppingItems,shoppingDirty:state.shoppingDirty,pantry:state.pantry}));}catch(e){}
+  savePantryCloud(state.pantry);
+}
+
+// ══ NAV ══
+function showView(n){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+n).classList.add('active');
+  document.querySelector('[data-view="'+n+'"]').classList.add('active');
+  if(n==='shop'){if(state.shoppingDirty&&state.recipes.length>0)genShopList(false);else renderShop();}
+  if(n==='pantry')renderPantry();
+  if(n==='tesco')renderExport();
+  if(n==='add')renderRecipes();
+}
+
+// ══ OVERVIEW ══
+function updateOv(){
+  const c=state.recipes.length;
+  document.getElementById('ovR').textContent=c;
+  let sv=0,ig=0;
+  state.recipes.forEach(r=>{sv+=parseInt(r.serves)||2;ig+=(r.ingredients||[]).length;});
+  document.getElementById('ovS').textContent=sv;
+  document.getElementById('ovI').textContent=ig;
+  document.getElementById('ovD').textContent=Math.round(sv/2);
+  document.getElementById('recSub').textContent=c===0?'Add recipes for your fortnight below.':c+' recipe'+(c!==1?'s':'')+' planned · '+sv+' total servings';
+  updateBal();
+}
+function updateBal(){
+  const ct=document.getElementById('balTags');
+  if(!state.recipes.length){ct.innerHTML='<span class="bal-empty">Add recipes to see your variety breakdown</span>';return;}
+  const cats={veg:0,meat:0,fish:0,pasta:0,other:0};
+  const vk=['vegetarian','vegan','veggie','tofu','halloumi','chickpea','lentil','mushroom','cauliflower','squash','falafel'];
+  const mk=['chicken','beef','lamb','pork','steak','mince','sausage','bacon','turkey','duck'];
+  const fk=['salmon','tuna','cod','prawn','shrimp','fish','sea bass','mackerel','haddock','anchovy'];
+  const pk=['pasta','spaghetti','penne','rigatoni','linguine','tagliatelle','risotto','gnocchi','noodle','orzo'];
+  state.recipes.forEach(r=>{
+    const t=(r.name+' '+(r.ingredients||[]).join(' ')).toLowerCase();
+    if(fk.some(k=>t.includes(k)))cats.fish++;
+    else if(mk.some(k=>t.includes(k)))cats.meat++;
+    else if(vk.some(k=>t.includes(k)))cats.veg++;
+    else if(pk.some(k=>t.includes(k)))cats.pasta++;
+    else cats.other++;
+  });
+  const lbl={veg:'🌱 Veggie',meat:'🥩 Meat',fish:'🐟 Fish',pasta:'🍝 Pasta',other:'🍳 Other'};
+  ct.innerHTML=Object.entries(cats).filter(([,v])=>v>0).map(([k,v])=>`<span class="bal-tag bt-${k}">${lbl[k]} ×${v}</span>`).join('');
+}
+
+// ══ CHAT ══
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function qp(t){const i=document.getElementById('chatInp');i.value=t;i.focus();autoResize(i);}
+
+function addMsg(role,content){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML=`<div class="msg-av">${role==='ai'?'🍴':'👤'}</div><div class="msg-bub">${content}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function addTyping(){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='msg ai';d.id='typing';
+  d.innerHTML=`<div class="msg-av">🍴</div><div class="msg-bub"><div class="tdots"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function rmTyping(){const e=document.getElementById('typing');if(e)e.remove();}
+
+async function sendMsg(){
+  const inp=document.getElementById('chatInp');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';inp.style.height='auto';
+  document.getElementById('sendBtn').disabled=true;
+  addMsg('user',txt);addTyping();
+
+  const sys=`You are a helpful recipe assistant in a fortnightly food shopping app.
+When a user pastes a recipe, caption, or describes a dish: extract a structured recipe.
+When they want ideas: suggest full recipes. When they mention ingredients to use up: suggest recipes.
+CRITICAL: Respond ONLY with raw JSON, no markdown, no backticks:
+{"message":"Your friendly reply","recipes":[{"name":"Name","serves":"2-3","source":"Instagram/Suggested/User","ingredients":["200g pasta"],"steps":["Step 1"]}]}
+If no recipe identified, return "recipes":[]. Include quantities. Be warm and practical.`;
+
+  const ctx=state.recipes.length?'\n\n[Already planned: '+state.recipes.map(r=>r.name).join(', ')+']':'';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:txt+ctx}]})});
+    const data=await res.json();rmTyping();
+    const raw=data.content?.[0]?.text||'{}';
+    let parsed;try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){parsed={message:raw,recipes:[]};}
+    addMsg('ai',parsed.message||'Done!');
+    if(parsed.recipes&&parsed.recipes.length>0){
+      let added=0;
+      parsed.recipes.forEach(r=>{if(!state.recipes.find(x=>x.name.toLowerCase()===r.name.toLowerCase())){state.recipes.push({...r,id:Date.now()+Math.random()});added++;}});
+      if(added>0){state.shoppingDirty=true;saveState();renderRecipes();updateOv();toast(added===1?`✅ "${parsed.recipes[0].name}" added!`:`✅ ${added} recipes added!`);}
+    }
+  }catch(e){rmTyping();addMsg('ai','Sorry, connection issue. Please try again.');}
+  document.getElementById('sendBtn').disabled=false;
+}
+
+// ══ RECIPES ══
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderRecipes(){
+  const c=document.getElementById('rlist');updateOv();
+  if(!state.recipes.length){c.innerHTML=`<div class="empty-st"><div class="ei">🍽️</div><p>No recipes yet — use the quick actions or chat above!</p></div>`;return;}
+  c.innerHTML=state.recipes.map((r,i)=>`
+    <div class="rcard">
+      <div class="rcard-hdr" onclick="togRec(${i})">
+        <div>
+          <div class="rcard-title">${esc(r.name)}</div>
+          <div class="rcard-meta">
+            ${r.serves?`<span class="tag tag-s">Serves ${esc(r.serves)}</span>`:''}
+            ${r.source?`<span class="tag tag-src">${esc(r.source)}</span>`:''}
+          </div>
+        </div>
+        <button class="rtoggle" id="rt${i}">▾</button>
+      </div>
+      <div class="rcard-body" id="rb${i}">
+        ${r.ingredients&&r.ingredients.length?`
+          <div class="rsec">
+            <div class="rsec-lbl">Ingredients</div>
+            <ul>${r.ingredients.map((ing,j)=>`<li><div class="ing-row"><span class="ing-span" contenteditable="true" onblur="updIng(${i},${j},this)">${esc(ing)}</span><button class="ing-del" onclick="delIng(${i},${j},event)">✕</button></div></li>`).join('')}</ul>
+            <div class="add-ing-row"><input class="add-ing-input" id="ni${i}" placeholder="Add ingredient…" onkeydown="if(event.key==='Enter'){addIng(${i});event.preventDefault();}"/><button class="add-ing-btn" onclick="addIng(${i})">+ Add</button></div>
+          </div>`:''}
+        ${r.steps&&r.steps.length?`<div class="rsec rsteps"><div class="rsec-lbl">Method</div><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`:''}
+        <div class="rcard-actions">
+          <button class="ract-btn" onclick="openEdit(${i},event)">✎ Edit details</button>
+          <button class="ract-btn danger" onclick="rmRec(${i},event)">✕ Remove</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togRec(i){const b=document.getElementById('rb'+i),t=document.getElementById('rt'+i);b.classList.toggle('open');t.classList.toggle('open');}
+function rmRec(i,e){e.stopPropagation();const n=state.recipes[i].name;state.recipes.splice(i,1);state.shoppingDirty=true;saveState();renderRecipes();toast(`Removed "${n}"`);}
+
+function updIng(ri,ii,el){const v=el.textContent.trim();if(v&&v!==state.recipes[ri].ingredients[ii]){state.recipes[ri].ingredients[ii]=v;state.shoppingDirty=true;saveState();}}
+function delIng(ri,ii,e){e.stopPropagation();state.recipes[ri].ingredients.splice(ii,1);state.shoppingDirty=true;saveState();renderRecipes();setTimeout(()=>{const b=document.getElementById('rb'+ri),t=document.getElementById('rt'+ri);if(b){b.classList.add('open');t.classList.add('open');}},10);}
+function addIng(ri){const inp=document.getElementById('ni'+ri);const v=inp.value.trim();if(!v)return;state.recipes[ri].ingredients=state.recipes[ri].ingredients||[];state.recipes[ri].ingredients.push(v);state.shoppingDirty=true;saveState();renderRecipes();setTimeout(()=>{const b=document.getElementById('rb'+ri),t=document.getElementById('rt'+ri);if(b){b.classList.add('open');t.classList.add('open');}},10);}
+
+function openEdit(i,e){e.stopPropagation();editIdx=i;const r=state.recipes[i];document.getElementById('editName').value=r.name||'';document.getElementById('editServes').value=r.serves||'';document.getElementById('editSource').value=r.source||'';document.getElementById('editModal').classList.add('open');}
+function closeModal(e){if(e.target===document.getElementById('editModal'))document.getElementById('editModal').classList.remove('open');}
+function saveEdit(){if(editIdx===null)return;state.recipes[editIdx].name=document.getElementById('editName').value.trim()||state.recipes[editIdx].name;state.recipes[editIdx].serves=document.getElementById('editServes').value.trim();state.recipes[editIdx].source=document.getElementById('editSource').value.trim();saveState();renderRecipes();document.getElementById('editModal').classList.remove('open');toast('Recipe updated ✓');}
+
+// ══ SHOP ══
+async function genShopList(userTriggered=true){
+  if(!state.recipes.length){if(userTriggered)toast('Add some recipes first!');return;}
+  const btn=document.getElementById('regenBtn');btn.disabled=true;btn.innerHTML='⟳ Updating…';
+  const ings=state.recipes.flatMap(r=>(r.ingredients||[]).map(ing=>({ingredient:ing,recipe:r.name})));
+  const prompt=`Consolidate these recipe ingredients into a shopping list.
+Ingredients: ${JSON.stringify(ings)}
+Return ONLY raw JSON (no markdown):
+{"categories":{"Fruit & Vegetables":[{"name":"item","amount":"qty","checked":false}],"Meat & Fish":[],"Dairy & Eggs":[],"Bakery & Bread":[],"Tins & Packets":[],"Fridge & Frozen":[],"Other":[]}}
+Rules: combine duplicates; only include categories with items; EXCLUDE these pantry staples (they're managed separately): olive oil, vegetable oil, sesame oil, coconut oil, any vinegar, salt, pepper, spices, dried herbs, soy sauce, fish sauce, worcestershire sauce, hot sauce, sriracha, tomato puree, tinned tomatoes, coconut milk, honey, mustard, tahini, stock cubes; keep amounts supermarket-friendly.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    state.shoppingItems=parsed.categories||{};state.shoppingDirty=false;saveState();renderShop();
+    if(userTriggered)toast('Shopping list updated!');
+  }catch(e){if(userTriggered)toast('Error updating list — please try again.');}
+  btn.disabled=false;btn.innerHTML='⟳ Refresh <span class="auto-b">auto</span>';
+}
+
+function renderShop(){
+  const c=document.getElementById('shopContainer'),cats=state.shoppingItems;
+  if(!cats||!Object.keys(cats).length){c.innerHTML=`<div class="empty-st"><div class="ei">📋</div><p>Add recipes and your list appears here automatically.</p></div>`;document.getElementById('shopCnt').textContent='0';return;}
+  let total=0,html='';
+  Object.entries(cats).forEach(([cat,items])=>{
+    if(!items||!items.length)return;
+    total+=items.filter(i=>!i.checked).length;
+    html+=`<div class="shop-cat"><div class="shop-cat-title">${cat}</div>`;
+    items.forEach((item,i)=>{html+=`<div class="shop-item"><div class="shop-chk ${item.checked?'chk':''}" onclick="togShop('${cat}',${i})">${item.checked?'✓':''}</div><span class="shop-iname ${item.checked?'chk':''}">${esc(item.name)}</span>${item.amount?`<span class="shop-amt">${esc(item.amount)}</span>`:''}</div>`;});
+    html+=`</div>`;
+  });
+  c.innerHTML=html;document.getElementById('shopCnt').textContent=total;
+}
+
+function togShop(cat,i){if(state.shoppingItems[cat]?.[i]){state.shoppingItems[cat][i].checked=!state.shoppingItems[cat][i].checked;saveState();renderShop();}}
+
+// ══ PANTRY ══
+function renderPantry(){
+  document.getElementById('syncCode').textContent=syncId;
+  const c=document.getElementById('pantryContainer');
+  const cats=[{key:'oils',icon:'🫙',label:'Oils & Vinegars'},{key:'herbs',icon:'🌿',label:'Dried Herbs & Spices'},{key:'sauces',icon:'🍶',label:'Sauces & Condiments'}];
+  c.innerHTML=cats.map(cat=>`<div class="pcat"><div class="pcat-hdr"><span class="pcat-ico">${cat.icon}</span><span class="pcat-name">${cat.label}</span></div>${state.pantry[cat.key].map((item,i)=>`<div class="pitem"><span class="pitem-name">${esc(item.name)}</span><div class="pbtn-grp"><button class="pbtn ${item.status==='have'?'ph':''}" onclick="setPantry('${cat.key}',${i},'have')">Have ✓</button><button class="pbtn ${item.status==='need'?'pn':''}" onclick="setPantry('${cat.key}',${i},'need')">Need</button></div></div>`).join('')}</div>`).join('');
+}
+function setPantry(cat,i,s){if(state.pantry[cat]?.[i]){state.pantry[cat][i].status=state.pantry[cat][i].status===s?'unknown':s;saveState();renderPantry();}}
+
+// ══ EXPORT ══
+function renderExport(){
+  const needed=[];Object.values(state.pantry).forEach(cat=>cat.filter(i=>i.status==='need').forEach(i=>needed.push(i.name)));
+  const shopItems=[];Object.entries(state.shoppingItems).forEach(([,items])=>(items||[]).filter(i=>!i.checked).forEach(i=>shopItems.push(i.amount?`${i.name} — ${i.amount}`:i.name)));
+  const all=[...shopItems,...needed];
+  if(!all.length){document.getElementById('expList').textContent='No items yet. Add recipes and check your pantry first.';document.getElementById('cprompt').textContent='Your prompt will appear here once you have items ready.';return;}
+  const listTxt=all.map((item,i)=>`${i+1}. ${item}`).join('\n');
+  document.getElementById('expList').textContent=listTxt;
+  document.getElementById('cprompt').textContent=`Please do my fortnightly Tesco food shop. Go to tesco.com and add each item below to my basket, choosing the standard Tesco own-brand or best value option unless otherwise specified. Once all items are added, find the earliest available delivery slot and proceed to checkout — but pause before confirming payment so I can review.
+
+Shopping list:
+${listTxt}
+
+As you go, please:
+- Confirm each item as you add it
+- Flag anything you can't find a good match for
+- Suggest the closest alternative if something is out of stock`;
+}
+function copyList(){navigator.clipboard.writeText(document.getElementById('expList').textContent).then(()=>toast('📋 List copied!'));}
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('cprompt').textContent).then(()=>toast('✅ Prompt copied — paste into Claude for Chrome'));}
+
+// ══ UTILS ══
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ══ INIT ══
+loadState();
+const d=new Date();
+document.getElementById('hdrDate').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+document.getElementById('syncCode').textContent=syncId;
+
+loadPantryCloud(syncId).then(data=>{
+  if(data){mergePantry(data);saveState();document.getElementById('hdrSync').textContent='⬤ synced';document.getElementById('hdrSync').style.color='var(--sage-light)';}
+});
+
+renderRecipes();updateOv();
+</script>
+</body>
+</html>
