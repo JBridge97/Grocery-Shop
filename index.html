@@ -506,11 +506,16 @@ If no recipe identified, return "recipes":[]. Include quantities. Be warm and pr
 
   const ctx=state.recipes.length?'\n\n[Already planned: '+state.recipes.map(r=>r.name).join(', ')+']':'';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:txt+ctx}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:txt+ctx}]})});
     const data=await res.json();rmTyping();
     const raw=data.content?.[0]?.text||'{}';
-    let parsed;try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){parsed={message:raw,recipes:[]};}
-    addMsg('ai',parsed.message||'Done!');
+    let parsed;
+    try{
+      const jm=raw.match(/\{[\s\S]*\}/);
+      parsed=JSON.parse((jm?jm[0]:raw).replace(/```json|```/g,'').trim());
+    }catch(e){parsed={message:raw,recipes:[]};}
+    if(!parsed.message&&!parsed.recipes){parsed={message:raw,recipes:[]};}
+    addMsg('ai',parsed.message||'Got it!');
     if(parsed.recipes&&parsed.recipes.length>0){
       let added=0;
       parsed.recipes.forEach(r=>{if(!state.recipes.find(x=>x.name.toLowerCase()===r.name.toLowerCase())){state.recipes.push({...r,id:Date.now()+Math.random()});added++;}});
@@ -576,7 +581,7 @@ Return ONLY raw JSON (no markdown):
 {"categories":{"Fruit & Vegetables":[{"name":"item","amount":"qty","checked":false}],"Meat & Fish":[],"Dairy & Eggs":[],"Bakery & Bread":[],"Tins & Packets":[],"Fridge & Frozen":[],"Other":[]}}
 Rules: combine duplicates; only include categories with items; EXCLUDE these pantry staples (they're managed separately): olive oil, vegetable oil, sesame oil, coconut oil, any vinegar, salt, pepper, spices, dried herbs, soy sauce, fish sauce, worcestershire sauce, hot sauce, sriracha, tomato puree, tinned tomatoes, coconut milk, honey, mustard, tahini, stock cubes; keep amounts supermarket-friendly.`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const raw=data.content?.[0]?.text||'{}';
     const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
